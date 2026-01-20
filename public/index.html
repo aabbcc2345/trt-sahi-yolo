@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>扫雷游戏</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .auth-container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+        }
+        
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            background-color: #45a049;
+        }
+        
+        .btn-secondary {
+            background-color: #6c757d;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+        
+        .btn-danger {
+            background-color: #dc3545;
+        }
+        
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+        
+        .toggle-auth {
+            text-align: center;
+            margin-top: 15px;
+            cursor: pointer;
+            color: #007bff;
+        }
+        
+        .toggle-auth:hover {
+            text-decoration: underline;
+        }
+        
+        .game-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .game-info {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .info-item {
+            background-color: #f8f9fa;
+            padding: 10px 15px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        
+        .difficulty-selector {
+            margin-bottom: 20px;
+        }
+        
+        select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .board {
+            display: grid;
+            gap: 2px;
+            margin: 20px 0;
+            background-color: #ddd;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        
+        .cell {
+            width: 30px;
+            height: 30px;
+            background-color: #999;
+            border: 2px solid #ccc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .cell.revealed {
+            background-color: #eee;
+            border: 1px solid #ccc;
+        }
+        
+        .cell.flagged {
+            background-color: #ffc107;
+        }
+        
+        .cell.mine {
+            background-color: #dc3545;
+            color: white;
+        }
+        
+        .cell.mine.revealed {
+            background-color: #dc3545;
+        }
+        
+        .cell.1 { color: #007bff; }
+        .cell.2 { color: #28a745; }
+        .cell.3 { color: #dc3545; }
+        .cell.4 { color: #6f42c1; }
+        .cell.5 { color: #fd7e14; }
+        .cell.6 { color: #17a2b8; }
+        .cell.7 { color: #212529; }
+        .cell.8 { color: #6c757d; }
+        
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .controls button {
+            flex: 1;
+        }
+        
+        .records-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .records-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .records-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .records-table th, .records-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .records-table th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+        
+        .records-table tr:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .action-buttons button {
+            padding: 5px 10px;
+            font-size: 12px;
+            width: auto;
+        }
+        
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .nav-tab {
+            padding: 10px 20px;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 4px 4px 0 0;
+            cursor: pointer;
+        }
+        
+        .nav-tab.active {
+            background-color: white;
+            border-bottom: 1px solid white;
+            font-weight: bold;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .success { color: #28a745; }
+        .error { color: #dc3545; }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 300px;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .close {
+            cursor: pointer;
+            font-size: 20px;
+            color: #aaa;
+        }
+        
+        .close:hover {
+            color: #000;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>扫雷游戏</h1>
+        
+        <!-- 认证容器 -->
+        <div id="auth-container" class="auth-container">
+            <!-- 登录表单 -->
+            <div id="login-form" class="tab-content active">
+                <h2>登录</h2>
+                <div class="form-group">
+                    <label for="login-username">用户名</label>
+                    <input type="text" id="login-username" placeholder="请输入用户名">
+                </div>
+                <div class="form-group">
+                    <label for="login-password">密码</label>
+                    <input type="password" id="login-password" placeholder="请输入密码">
+                </div>
+                <button onclick="login()">登录</button>
+                <div class="toggle-auth" onclick="toggleAuth()">没有账号？点击注册</div>
+            </div>
+            
+            <!-- 注册表单 -->
+            <div id="register-form" class="tab-content">
+                <h2>注册</h2>
+                <div class="form-group">
+                    <label for="register-username">用户名</label>
+                    <input type="text" id="register-username" placeholder="请输入用户名">
+                </div>
+                <div class="form-group">
+                    <label for="register-password">密码</label>
+                    <input type="password" id="register-password" placeholder="请输入密码">
+                </div>
+                <button onclick="register()">注册</button>
+                <div class="toggle-auth" onclick="toggleAuth()">已有账号？点击登录</div>
+            </div>
+        </div>
+        
+        <!-- 游戏主界面 -->
+        <div id="game-main" style="display: none;">
+            <!-- 导航标签 -->
+            <div class="nav-tabs">
+                <div class="nav-tab active" onclick="showTab('game')">游戏</div>
+                <div class="nav-tab" onclick="showTab('records')">游戏记录</div>
+            </div>
+            
+            <!-- 游戏标签内容 -->
+            <div id="game" class="tab-content active">
+                <div class="game-container">
+                    <div class="game-header">
+                        <div class="game-info">
+                            <div class="info-item">用户: <span id="current-user"></span></div>
+                            <div class="info-item">时间: <span id="timer">0</span>秒</div>
+                            <div class="info-item">地雷: <span id="mine-count">0</span></div>
+                        </div>
+                        <button onclick="logout()" class="btn-secondary" style="width: auto;">退出登录</button>
+                    </div>
+                    
+                    <div class="difficulty-selector">
+                        <label for="difficulty">难度：</label>
+                        <select id="difficulty" onchange="newGame()">
+                            <option value="beginner">初级 (9x9, 10雷)</option>
+                            <option value="intermediate">中级 (16x16, 40雷)</option>
+                            <option value="expert">高级 (30x16, 99雷)</option>
+                        </select>
+                    </div>
+                    
+                    <div id="board" class="board"></div>
+                    
+                    <div class="controls">
+                        <button onclick="newGame()">新游戏</button>
+                        <button onclick="showAllMines()">显示所有地雷</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 游戏记录标签内容 -->
+            <div id="records" class="tab-content">
+                <div class="records-container">
+                    <div class="records-header">
+                        <h2>游戏记录</h2>
+                        <button onclick="refreshRecords()">刷新记录</button>
+                    </div>
+                    <table class="records-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>难度</th>
+                                <th>时间 (秒)</th>
+                                <th>地雷数</th>
+                                <th>结果</th>
+                                <th>创建时间</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="records-body">
+                            <!-- 记录将通过JavaScript动态生成 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 编辑记录模态框 -->
+    <div id="edit-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>编辑记录</h3>
+                <span class="close" onclick="closeEditModal()">&times;</span>
+            </div>
+            <div class="form-group">
+                <label for="edit-difficulty">难度</label>
+                <select id="edit-difficulty">
+                    <option value="beginner">初级</option>
+                    <option value="intermediate">中级</option>
+                    <option value="expert">高级</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="edit-time">时间 (秒)</label>
+                <input type="number" id="edit-time" min="1">
+            </div>
+            <div class="form-group">
+                <label for="edit-mines">地雷数</label>
+                <input type="number" id="edit-mines" min="1">
+            </div>
+            <div class="form-group">
+                <label for="edit-success">结果</label>
+                <select id="edit-success">
+                    <option value="true">成功</option>
+                    <option value="false">失败</option>
+                </select>
+            </div>
+            <button onclick="saveEditedRecord()">保存</button>
+        </div>
+    </div>
+    
+    <script>
+        // 游戏状态
+        let game = {
+            board: [],
+            revealed: [],
+            flagged: [],
+            width: 9,
+            height: 9,
+            mines: 10,
+            difficulty: 'beginner',
+            timer: 0,
+            timerInterval: null,
+            gameStarted: false,
+            gameOver: false,
+            gameWon: false
+        };
+        
+        // 用户状态
+        let currentUser = null;
+        let authToken = null;
+        let editingRecordId = null;
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAuth();
+        });
+        
+        // 检查认证状态
+        function checkAuth() {
+            authToken = localStorage.getItem('authToken');
+            const userData = localStorage.getItem('currentUser');
+            
+            if (authToken && userData) {
+                currentUser = JSON.parse(userData);
+                showGameMain();
+                refreshRecords();
+            }
+        }
+        
+        // 切换登录/注册表单
+        function toggleAuth() {
+            const loginForm = document.getElementById('login-form');
+            const registerForm = document.getElementById('register-form');
+            const isLoginVisible = loginForm.classList.contains('active');
+            
+            loginForm.classList.toggle('active', !isLoginVisible);
+            registerForm.classList.toggle('active', isLoginVisible);
+        }
+        
+        // 注册
+        async function register() {
+            const username = document.getElementById('register-username').value;
+            const password = document.getElementById('register-password').value;
+            
+            const response = await fetch('http://localhost:3000/api/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+            
+            const data = await response.json();
+            alert(data.message);
+            
+            if (response.ok) {
+                toggleAuth();
+            }
+        }
+        
+        // 登录
+        async function login() {
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+            
+            const response = await fetch('http://localhost:3000/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok) {
+                authToken = data.token;
+                currentUser = data.user;
+                localStorage.setItem('authToken', authToken);
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                showGameMain();
+                refreshRecords();
+            } else {
+                alert(data.message);
+            }
+        }
+        
+        // 退出登录
+        function logout() {
+            authToken = null;
+            currentUser = null;
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('currentUser');
+            showAuthContainer();
+            clearInterval(game.timerInterval);
+        }
+        
+        // 显示游戏主界面
+        function showGameMain() {
+            document.getElementById('auth-container').style.display = 'none';
+            document.getElementById('game-main').style.display = 'block';
+            document.getElementById('current-user').textContent = currentUser.username;
+            newGame();
+        }
+        
+        // 显示认证容器
+        function showAuthContainer() {
+            document.getElementById('auth-container').style.display = 'block';
+            document.getElementById('game-main').style.display = 'none';
+        }
+        
+        // 显示标签
+        function showTab(tabName) {
+            // 切换标签激活状态
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelector(`[onclick="showTab('${tabName}')"]`).classList.add('active');
+            
+            // 切换内容显示
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(tabName).classList.add('active');
+            
+            if (tabName === 'records') {
+                refreshRecords();
+            }
+        }
+        
+        // 初始化游戏
+        function initializeGame() {
+            const difficulty = document.getElementById('difficulty').value;
+            
+            // 设置游戏参数
+            if (difficulty === 'beginner') {
+                game.width = 9;
+                game.height = 9;
+                game.mines = 10;
+            } else if (difficulty === 'intermediate') {
+                game.width = 16;
+                game.height = 16;
+                game.mines = 40;
+            } else if (difficulty === 'expert') {
+                game.width = 30;
+                game.height = 16;
+                game.mines = 99;
+            }
+            
+            game.difficulty = difficulty;
+            game.timer = 0;
+            game.gameStarted = false;
+            game.gameOver = false;
+            game.gameWon = false;
+            
+            // 重置计时器
+            clearInterval(game.timerInterval);
+            document.getElementById('timer').textContent = game.timer;
+            document.getElementById('mine-count').textContent = game.mines;
+            
+            // 初始化棋盘
+            game.board = Array(game.height).fill().map(() => Array(game.width).fill(0));
+            game.revealed = Array(game.height).fill().map(() => Array(game.width).fill(false));
+            game.flagged = Array(game.height).fill().map(() => Array(game.width).fill(false));
+            
+            // 渲染棋盘
+            renderBoard();
+        }
+        
+        // 渲染棋盘
+        function renderBoard() {
+            const boardElement = document.getElementById('board');
+            boardElement.style.gridTemplateColumns = `repeat(${game.width}, 30px)`;
+            boardElement.innerHTML = '';
+            
+            for (let y = 0; y < game.height; y++) {
+                for (let x = 0; x < game.width; x++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.dataset.x = x;
+                    cell.dataset.y = y;
+                    
+                    // 处理左键点击
+                    cell.addEventListener('click', () => handleCellClick(x, y));
+                    // 处理右键点击
+                    cell.addEventListener('contextmenu', (e) => {
+                        e.preventDefault();
+                        handleCellRightClick(x, y);
+                    });
+                    
+                    boardElement.appendChild(cell);
+                }
+            }
+        }
+        
+        // 生成地雷
+        function generateMines(firstClickX, firstClickY) {
+            let minesPlaced = 0;
+            
+            while (minesPlaced < game.mines) {
+                const x = Math.floor(Math.random() * game.width);
+                const y = Math.floor(Math.random() * game.height);
+                
+                // 确保第一个点击的位置不是地雷
+                if ((x === firstClickX && y === firstClickY) || game.board[y][x] === 'mine') {
+                    continue;
+                }
+                
+                game.board[y][x] = 'mine';
+                minesPlaced++;
+            }
+            
+            // 计算每个格子周围的地雷数
+            calculateNumbers();
+        }
+        
+        // 计算每个格子周围的地雷数
+        function calculateNumbers() {
+            for (let y = 0; y < game.height; y++) {
+                for (let x = 0; x < game.width; x++) {
+                    if (game.board[y][x] === 'mine') continue;
+                    
+                    let count = 0;
+                    for (let dy = -1; dy <= 1; dy++) {
+                        for (let dx = -1; dx <= 1; dx++) {
+                            const nx = x + dx;
+                            const ny = y + dy;
+                            if (nx >= 0 && nx < game.width && ny >= 0 && ny < game.height) {
+                                if (game.board[ny][nx] === 'mine') {
+                                    count++;
+                                }
+                            }
+                        }
+                    }
+                    game.board[y][x] = count;
+                }
+            }
+        }
+        
+        // 处理左键点击
+        function handleCellClick(x, y) {
+            if (game.gameOver || game.revealed[y][x] || game.flagged[y][x]) {
+                return;
+            }
+            
+            // 如果是第一次点击，生成地雷
+            if (!game.gameStarted) {
+                generateMines(x, y);
+                game.gameStarted = true;
+                startTimer();
+            }
+            
+            // 揭示格子
+            revealCell(x, y);
+            
+            // 检查游戏是否获胜
+            checkWin();
+        }
+        
+        // 处理右键点击（标记/取消标记地雷）
+        function handleCellRightClick(x, y) {
+            if (game.gameOver || game.revealed[y][x]) {
+                return;
+            }
+            
+            game.flagged[y][x] = !game.flagged[y][x];
+            updateCell(x, y);
+            
+            // 更新地雷计数
+            const flaggedCount = game.flagged.flat().filter(flagged => flagged).length;
+            document.getElementById('mine-count').textContent = game.mines - flaggedCount;
+        }
+        
+        // 揭示格子
+        function revealCell(x, y) {
+            if (x < 0 || x >= game.width || y < 0 || y >= game.height) return;
+            if (game.revealed[y][x] || game.flagged[y][x]) return;
+            
+            game.revealed[y][x] = true;
+            updateCell(x, y);
+            
+            // 如果点击到地雷，游戏结束
+            if (game.board[y][x] === 'mine') {
+                game.gameOver = true;
+                clearInterval(game.timerInterval);
+                revealAllMines();
+                saveGameRecord(false);
+                alert('游戏结束！你踩到地雷了！');
+                return;
+            }
+            
+            // 如果周围没有地雷，递归揭示相邻格子
+            if (game.board[y][x] === 0) {
+                for (let dy = -1; dy <= 1; dy++) {
+                    for (let dx = -1; dx <= 1; dx++) {
+                        revealCell(x + dx, y + dy);
+                    }
+                }
+            }
+        }
+        
+        // 更新格子显示
+        function updateCell(x, y) {
+            const cell = document.querySelector(`[data-x="${x}"][data-y="${y}"]`);
+            if (!cell) return;
+            
+            cell.className = 'cell';
+            
+            if (game.revealed[y][x]) {
+                cell.classList.add('revealed');
+                
+                if (game.board[y][x] === 'mine') {
+                    cell.classList.add('mine');
+                    cell.textContent = '💣';
+                } else if (game.board[y][x] > 0) {
+                    cell.classList.add(game.board[y][x]);
+                    cell.textContent = game.board[y][x];
+                }
+            } else if (game.flagged[y][x]) {
+                cell.classList.add('flagged');
+                cell.textContent = '🚩';
+            }
+        }
+        
+        // 揭示所有地雷
+        function revealAllMines() {
+            for (let y = 0; y < game.height; y++) {
+                for (let x = 0; x < game.width; x++) {
+                    if (game.board[y][x] === 'mine') {
+                        game.revealed[y][x] = true;
+                        updateCell(x, y);
+                    }
+                }
+            }
+        }
+        
+        // 显示所有地雷（调试用）
+        function showAllMines() {
+            for (let y = 0; y < game.height; y++) {
+                for (let x = 0; x < game.width; x++) {
+                    const cell = document.querySelector(`[data-x="${x}"][data-y="${y}"]`);
+                    if (game.board[y][x] === 'mine') {
+                        cell.style.backgroundColor = '#ffcccc';
+                    }
+                }
+            }
+        }
+        
+        // 检查游戏是否获胜
+        function checkWin() {
+            let revealedCount = 0;
+            const totalCells = game.width * game.height;
+            
+            for (let y = 0; y < game.height; y++) {
+                for (let x = 0; x < game.width; x++) {
+                    if (game.revealed[y][x]) {
+                        revealedCount++;
+                    }
+                }
+            }
+            
+            if (revealedCount === totalCells - game.mines) {
+                game.gameOver = true;
+                game.gameWon = true;
+                clearInterval(game.timerInterval);
+                saveGameRecord(true);
+                alert(`恭喜你获胜了！用时 ${game.timer} 秒！`);
+            }
+        }
+        
+        // 开始计时器
+        function startTimer() {
+            game.timerInterval = setInterval(() => {
+                game.timer++;
+                document.getElementById('timer').textContent = game.timer;
+            }, 1000);
+        }
+        
+        // 新游戏
+        function newGame() {
+            initializeGame();
+        }
+        
+        // 保存游戏记录
+        async function saveGameRecord(success) {
+            if (!authToken) return;
+            
+            const record = {
+                difficulty: game.difficulty,
+                time: game.timer,
+                mines: game.mines,
+                success: success
+            };
+            
+            await fetch('http://localhost:3000/api/records', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`
+                },
+                body: JSON.stringify(record)
+            });
+            
+            // 如果当前在记录页面，刷新记录
+            if (document.getElementById('records').classList.contains('active')) {
+                refreshRecords();
+            }
+        }
+        
+        // 刷新游戏记录
+        async function refreshRecords() {
+            if (!authToken) return;
+            
+            const response = await fetch('http://localhost:3000/api/records', {
+                headers: {
+                    'Authorization': `Bearer ${authToken}`
+                }
+            });
+            
+            const records = await response.json();
+            const recordsBody = document.getElementById('records-body');
+            recordsBody.innerHTML = '';
+            
+            records.forEach(record => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${record.id}</td>
+                    <td>${record.difficulty}</td>
+                    <td>${record.time}秒</td>
+                    <td>${record.mines}</td>
+                    <td class="${record.success ? 'success' : 'error'}">${record.success ? '成功' : '失败'}</td>
+                    <td>${new Date(record.created_at).toLocaleString()}</td>
+                    <td class="action-buttons">
+                        <button onclick="editRecord(${record.id}, '${record.difficulty}', ${record.time}, ${record.mines}, ${record.success})" class="btn-secondary">编辑</button>
+                        <button onclick="deleteRecord(${record.id})" class="btn-danger">删除</button>
+                    </td>
+                `;
+                recordsBody.appendChild(row);
+            });
+        }
+        
+        // 编辑记录
+        function editRecord(id, difficulty, time, mines, success) {
+            editingRecordId = id;
+            document.getElementById('edit-difficulty').value = difficulty;
+            document.getElementById('edit-time').value = time;
+            document.getElementById('edit-mines').value = mines;
+            document.getElementById('edit-success').value = success.toString();
+            document.getElementById('edit-modal').style.display = 'block';
+        }
+        
+        // 关闭编辑模态框
+        function closeEditModal() {
+            document.getElementById('edit-modal').style.display = 'none';
+            editingRecordId = null;
+        }
+        
+        // 保存编辑后的记录
+        async function saveEditedRecord() {
+            if (!editingRecordId) return;
+            
+            const difficulty = document.getElementById('edit-difficulty').value;
+            const time = parseInt(document.getElementById('edit-time').value);
+            const mines = parseInt(document.getElementById('edit-mines').value);
+            const success = document.getElementById('edit-success').value === 'true';
+            
+            await fetch(`http://localhost:3000/api/records/${editingRecordId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`
+                },
+                body: JSON.stringify({ difficulty, time, mines, success })
+            });
+            
+            closeEditModal();
+            refreshRecords();
+        }
+        
+        // 删除记录
+        async function deleteRecord(id) {
+            if (confirm('确定要删除这条记录吗？')) {
+                await fetch(`http://localhost:3000/api/records/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                refreshRecords();
+            }
+        }
+        
+        // 显示游戏主界面
+        function showGameMain() {
+            document.getElementById('auth-container').style.display = 'none';
+            document.getElementById('game-main').style.display = 'block';
+            document.getElementById('current-user').textContent = currentUser.username;
+            newGame();
+        }
+        
+        // 关闭模态框（点击外部）
+        window.onclick = function(event) {
+            const modal = document.getElementById('edit-modal');
+            if (event.target === modal) {
+                closeEditModal();
+            }
+        }
+    </script>
+</body>
+</html>
